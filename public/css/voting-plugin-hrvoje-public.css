@@ -1,0 +1,48 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+.voting-block-buttons-inner {
+    font-weight: 300;
+    border: 2px dashed purple;
+    border-radius: 5px;
+    padding: 10px;
+
+}
+.voting-block-buttons-inner > .pre-vote-section,
+.voting-block-buttons-inner > .post-vote-section{
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+}
+.voting-block-buttons-inner > .post-vote-section {
+    display:none;
+}
+.post-vote .post-vote-section{
+    display:grid;
+}
+
+button.vote-button {
+    background-color: #fff;
+    outline: none;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-weight: bold;
+}
+.post-voting-text{
+    display:none;
+}
+.post-vote .post-voting-text{
+    display:block;
+}
+.voting-average {
+    background-color: #fff;
+    outline: none;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-weight: bold;
+    display: inline;
+    font-size: 17px;
+}
