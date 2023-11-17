@@ -52,8 +52,8 @@ class Voting_Plugin_Hrvoje_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-        add_action('wp_ajax_nopriv_handle_vote',array(&$this,'handle_vote'));
-        add_action('wp_ajax_handle_vote',array(&$this,'handle_vote'));
+        add_action('wp_ajax_nopriv_handle_vote',array(&$this,'handleVote'));
+        add_action('wp_ajax_handle_vote',array(&$this,'handleVote'));
 
         add_filter('the_content', array(&$this,'add_voting_buttons_after_content'));
 	}
@@ -122,7 +122,7 @@ class Voting_Plugin_Hrvoje_Public {
         return $content;
     }
 
-    public function handle_vote(){
+    public function handleVote(){
 
         if ( ! wp_verify_nonce( $_POST['nonce'], 'ajax-nonce' ) ) {
             die();
@@ -146,6 +146,31 @@ class Voting_Plugin_Hrvoje_Public {
         }
 
 
+        $votes_count = $this->fetchVotesCount($post_id);
+
+        $yes_votes_count = $votes_count['yes_votes_count']; //get_post_meta($post_id,'yes_vote_count',true);
+        $no_votes_count =  $votes_count['no_votes_count']; //get_post_meta($post_id,'no_vote_count',true);
+
+
+
+        $this->saveVoterInfo($post_id,$vote_type);
+        $response = array(
+            'success' => true,
+            'voting_results' => $this->calculateVotingPercentage($yes_votes_count,$no_votes_count),
+            'yes_vote_count' => $yes_votes_count,
+            'no_vote_count' => $no_votes_count
+        );
+
+
+         echo json_encode($response);
+
+
+
+        wp_die();
+    }
+
+    public function fetchVotesCount($post_id){
+
         $yes_votes_count = get_post_meta($post_id,'yes_vote_count',true);
         $no_votes_count = get_post_meta($post_id,'no_vote_count',true);
 
@@ -158,30 +183,27 @@ class Voting_Plugin_Hrvoje_Public {
             update_post_meta($post_id,  'no_vote_count', 0);
             $no_votes_count = 0;
         }
-        $response = array(
-            'success' => true,
-            'voting_results' => $this->calculate_voting_percentage($yes_votes_count,$no_votes_count),
-            'yes_vote_count' => $yes_votes_count,
-            'no_vote_count' => $no_votes_count
-        );
 
-        echo json_encode($response);
-
-
-
-        wp_die();
+        return array('yes_votes_count' => $yes_votes_count, 'no_votes_count' => $no_votes_count);
     }
 
-    public function calculate_voting_percentage($yes_votes = 0,$no_votes = 0){
-        $totalVotes = $yes_votes + $no_votes;
 
-        if ($totalVotes > 0) {
-            $positivePercentage = ($yes_votes / $totalVotes) * 100;
-            $negativePercentage = ($no_votes / $totalVotes) * 100;
+    /**
+     * @param $yes_votes
+     * @param $no_votes
+     * @return array|int[]
+     * Return percentage information
+     */
+    public function calculateVotingPercentage($yes_votes = 0,$no_votes = 0){
+        $total_votes = $yes_votes + $no_votes;
+
+        if ($total_votes > 0) {
+            $positive_percentage = ($yes_votes / $total_votes) * 100;
+            $negative_percentage = ($no_votes / $total_votes) * 100;
 
             return array(
-                'yes_percentage' => round($positivePercentage, 0),
-                'no_percentage' => round($negativePercentage, 0),
+                'yes_percentage' => round($positive_percentage, 0),
+                'no_percentage' => round($negative_percentage, 0),
             );
         } else {
             return array(
@@ -190,6 +212,66 @@ class Voting_Plugin_Hrvoje_Public {
             );
         }
     }
+
+    /**
+     * @param $post_id
+     * @param $vote_type
+     * @return void
+     *
+     * Save vote_type and ip address of current voter/visitor
+     */
+    function saveVoterInfo($post_id,$vote_type) {
+
+
+
+        $client_ip = $_SERVER['REMOTE_ADDR'];
+
+        // Get existing IP addresses array from post meta
+        $existing_votes = get_post_meta($post_id, 'voter_choices', true);
+
+
+
+        if (!$existing_votes) {
+            $existing_votes = array();
+        }
+        // Add the current IP to the array
+
+
+        if (!in_array($vote_type.'_'.$client_ip, $existing_votes)) {
+            // Add the current IP to the array
+            $existing_votes[] = $vote_type.'_'.$client_ip;
+
+            // Update post meta with the updated IP addresses array
+            update_post_meta($post_id, 'voter_choices', $existing_votes);
+        }
+
+
+
+
+
+    }
+
+    /**
+     * @param $post_id
+     * @return false|string[]
+     *
+     * Check the vote type and ip address of the visitor
+     */
+    function checkVisitorVoteStatus($post_id)
+    {
+        $clientIp = $_SERVER['REMOTE_ADDR'];
+        $existingIPs = get_post_meta($post_id, 'voter_choices', true);
+        if (is_array($existingIPs)) {
+            // Check if the current IP is not already in the array before adding it
+            if (in_array('yes_'.$clientIp, $existingIPs)){
+                return array('vote_type' => 'yes');
+            }elseif(in_array('no_'.$clientIp, $existingIPs)){
+                return array('vote_type' => 'no');
+            }
+        }
+        return false;
+    }
+
 
 
 }

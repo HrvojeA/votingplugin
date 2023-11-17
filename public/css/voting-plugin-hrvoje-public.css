@@ -18,6 +18,9 @@
 .voting-block-buttons-inner > .post-vote-section {
     display:none;
 }
+.post-vote .pre-vote-section {
+    margin-bottom: 30px;
+}
 .post-vote .post-vote-section{
     display:grid;
 }
@@ -27,22 +30,97 @@ button.vote-button {
     outline: none;
     border: 1px solid lightgray;
     border-radius: 3px;
-    padding: 8px 10px;
+    padding: 8px 13px 8px 30px;
     font-weight: bold;
+    position: relative;
+    transition: all .4s ease;
+    font-size:15px;
+}
+button.vote-button:hover {
+    border: 1px solid darkgray;
+    transition: all .4s ease;
+}
+.vote-button:hover *:after{
+    color:darkgray;
+    transition: all .4s ease;
+}
+.pre-voting-text,
+.post-voting-text{
+     text-transform: uppercase;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
 }
 .post-voting-text{
-    display:none;
+        display:none;
+}
+.voting-text {
+    display: flex;
+    align-items: center;
 }
 .post-vote .post-voting-text{
     display:block;
+
 }
 .voting-average {
     background-color: #fff;
     outline: none;
-    border: 1px solid lightgray;
+    border: 3px solid transparent;
     border-radius: 3px;
-    padding: 8px 10px;
+    padding: 8px 13px 8px 30px;
     font-weight: bold;
-    display: inline;
-    font-size: 17px;
+    display: inline-block;
+    font-size: 15px;
+    position: relative;
+}
+.yes-existing-vote .yes-average,
+.no-existing-vote .no-average,
+.voting-average.selected {
+    border: 3px solid #0063ff;
+}
+
+.yes-button:after, .yes-average:after{
+    position: absolute;
+    content: '\263a';
+    left: 2px;
+    top: -3px;
+    color: grey;
+    font-size: 27px;
+}
+.no-button:after,.no-average:after{
+    position: absolute;
+    content: '\1F611';
+    left: 7px;
+    top: 4px;
+    color: grey;
+    font-size: 19px;
+    transition: all .4s ease;
+}
+.yes-button:after{
+    left: 3px;
+    top: -1px;
+}
+.no-button:after{
+    left: 6px;
+    top: 5px;
+    color: grey;
+    font-size:19px;
+}
+
+@media screen and (max-width:600px){
+    .pre-vote-section, .post-vote-section {
+        grid-template-columns: 1fr!important;
+    }
+    .voting-results, .voting-buttons {
+        display: flex;
+         flex-wrap: wrap;
+        justify-content: center;
+    }
+    .voting-results > div, .voting-buttons > *{
+        margin-left:10px;
+        margin-right:10px;
+    }
+    .voting-text {
+        margin-bottom: 15px;
+    }
 }

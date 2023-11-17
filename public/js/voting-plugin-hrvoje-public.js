@@ -1,3 +1,5 @@
+let voteType,postId;
+
 (function( $ ) {
 	'use strict';
 
@@ -5,8 +7,10 @@
  		$('.vote-button').on('click', function(e) {
 			 e.preventDefault();
 
-			var postId = $(this).data('post-id');
-			var voteType = $(this).data('vote-type');
+			 postId = $(this).data('post-id');
+			 voteType = $(this).data('vote-type');
+			$('.'+voteType+'-average').addClass('selected');
+
 
 
 			// AJAX request
@@ -24,7 +28,7 @@
 					// Handle success, e.g., update UI
 
 					console.log(response);
-					handleResults(JSON.parse(response,$(this).data('vote-type')));
+					handleResults(JSON.parse(response));
 
 
 				},
@@ -40,11 +44,14 @@
 	function handleResults(data,voteType){
 
 		if(typeof data.voting_results !== 'undefined'){
-			jQuery('.yes-average .results-percentage').text(data.voting_results.yes_percentage);
-			jQuery('.no-average .results-percentage').text(data.voting_results.no_percentage)
-			jQuery('.voting-block-wrapper').addClass('post-vote');
+			$('.yes-average .results-percentage').text(data.voting_results.yes_percentage);
+			$('.no-average .results-percentage').text(data.voting_results.no_percentage)
+			$('.voting-block-wrapper').addClass('post-vote');
 
-			jQuery('.'+voteType+'-average').addClass('selected');
+			jQuery('button').prop('disabled',true);
+			$('.vote-button.selected').data('vote-type');
+
+			$('.'+voteType+'-average').addClass('selected');
 
 		}
 
